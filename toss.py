@@ -55,9 +55,12 @@ def test(needs):
         lacks[lack] += 1
     
     accum_prob = 0
+    expectation = 0
     for idx, x in enumerate(lacks):
         accum_prob += x
+        expectation += x * idx / TOSS_COUNT
         print(f'Lack {idx} elems prob: {x / TOSS_COUNT}, accum prob: {accum_prob / TOSS_COUNT}')
+    print(f'Expectation: {expectation}')
 
 if __name__ == '__main__':
     needs = [int(x) for x in sys.argv[1].split(',')]
