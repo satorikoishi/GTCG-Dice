@@ -5,7 +5,7 @@ import random
 ELEM_TYPES = 8
 ELEM_OMNI = ELEM_TYPES - 1
 INIT_DICE_COUNT = 8
-TOSS_COUNT = 100000
+TOSS_COUNT = 1000000
 
 def unaligned_range(needs):
     return range(len(needs), ELEM_OMNI)
@@ -31,9 +31,21 @@ def first_toss(dices):
 
 def conditional_toss(dices, needs):
     retoss_count = 0
+    
+    # print(f'dices after first toss: {dices}')
+
+    # Retoss all unaligned elems
     for i in unaligned_range(needs):
         retoss_count += dices[i]
         dices[i] = 0
+    
+    # Retoss elems over needs
+    for idx, x in enumerate(needs):
+        if dices[idx] > x:
+            retoss_count += dices[idx] - x
+            dices[idx] = x
+    
+    # print(f'dices before retoss: {dices}, # of retoss: {retoss_count}')
     
     for _ in range(retoss_count):
         elem = random.randrange(ELEM_TYPES)
