@@ -5,7 +5,7 @@ import random
 ELEM_TYPES = 8
 ELEM_OMNI = ELEM_TYPES - 1
 INIT_DICE_COUNT = 8
-TOSS_COUNT = 1000000
+TOSS_COUNT = 100000
 
 def unaligned_range(needs):
     return range(len(needs), ELEM_OMNI)
@@ -51,7 +51,7 @@ def conditional_toss(dices, needs):
         elem = random.randrange(ELEM_TYPES)
         dices[elem] += 1
 
-def test(needs):
+def test(needs, init_omni):
     total = 0
     for x in needs:
         total += x
@@ -59,6 +59,7 @@ def test(needs):
     
     for i in range(TOSS_COUNT):
         dices = [0] * INIT_DICE_COUNT
+        dices[ELEM_OMNI] += init_omni
         
         first_toss(dices)
         conditional_toss(dices, needs)
@@ -76,5 +77,9 @@ def test(needs):
 
 if __name__ == '__main__':
     needs = [int(x) for x in sys.argv[1].split(',')]
+    if len(sys.argv) > 2:
+        init_omni = int(sys.argv[2])
+    else:
+        init_omni = 0
     print(f'Testing with needs: {needs}, run {TOSS_COUNT} times')
-    test(needs)
+    test(needs, init_omni)
