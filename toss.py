@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 import sys
 import random
 
@@ -24,8 +26,8 @@ def dice_analyze(dices, needs):
     
     return lack
     
-def first_toss(dices):
-    for _ in range(INIT_DICE_COUNT):
+def first_toss(dices, dice_count=INIT_DICE_COUNT):
+    for _ in range(dice_count):
         elem = random.randrange(ELEM_TYPES)
         dices[elem] += 1
 
@@ -51,7 +53,7 @@ def conditional_toss(dices, needs):
         elem = random.randrange(ELEM_TYPES)
         dices[elem] += 1
 
-def test(needs, init_omni):
+def test(needs, init_omni, dice_count=INIT_DICE_COUNT):
     total = 0
     for x in needs:
         total += x
@@ -61,7 +63,7 @@ def test(needs, init_omni):
         dices = [0] * INIT_DICE_COUNT
         dices[ELEM_OMNI] += init_omni
         
-        first_toss(dices)
+        first_toss(dices, dice_count)
         conditional_toss(dices, needs)
         
         lack = dice_analyze(dices, needs)
