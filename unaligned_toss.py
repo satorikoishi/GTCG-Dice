@@ -29,21 +29,54 @@ def test_unaligned_toss(needs, unaligned_need, results, method=None):
         
         results.append([omni_count, effective_count, unaligned_count, first_tune, second_tune, method])
     
-def analyze_unaligned_toss(results, method=None):
+def analyze_unaligned_toss(results):
     # Overall
-    overall_result = [x for x in results if x[IDX_METHOD] == method]
+    for method in [None, 'u']:
+        overall_result = [x for x in results if x[IDX_METHOD] == method]
+        
+        first_tune_sum = 0
+        second_tune_sum = 0
+        worse_count = 0
+        for res in overall_result:
+            first_tune_sum += res[IDX_FIRST_TUNE]
+            second_tune_sum += res[IDX_SECOND_TUNE]
+            if res[IDX_FIRST_TUNE] < res[IDX_SECOND_TUNE]:
+                worse_count += 1
+        print(f'Method: {method}, First tune: {first_tune_sum / len(overall_result)}, Second tune: {second_tune_sum / len(overall_result)}, Worse: {worse_count / len(overall_result)}')
     
-    first_tune_sum = 0
-    second_tune_sum = 0
-    worse_count = 0
-    for res in overall_result:
-        first_tune_sum += res[IDX_FIRST_TUNE]
-        second_tune_sum += res[IDX_SECOND_TUNE]
-        if res[IDX_FIRST_TUNE] < res[IDX_SECOND_TUNE]:
-            worse_count += 1
-    print(f'Method: {method}, First tune: {first_tune_sum / TEST_COUNT}, Second tune: {second_tune_sum / TEST_COUNT}, Worse: {worse_count / TEST_COUNT}')
-    
-    # TODO: Different Cases
+    for omni in range(8):
+        omni_filter = [x for x in results if x[IDX_OMNI] == omni]
+        # print(f'Omni {omni} prob: {len(omni_filter) / len(results)}')
+        for effective in range(4):
+            if effective == 3:
+                effective_filter = [x for x in omni_filter if x[IDX_EFFECTIVE] >= effective]
+            else:
+                effective_filter = [x for x in omni_filter if x[IDX_EFFECTIVE] == effective]
+            # print(f'Effective {effective} prob: {len(effective_filter) / len(results)}')
+            for unaligned in range(4):
+                if unaligned == 3:
+                    unaligned_filter = [x for x in effective_filter if x[IDX_UNALIGNED] >= unaligned]
+                else:
+                    unaligned_filter = [x for x in effective_filter if x[IDX_UNALIGNED] == unaligned]
+                if len(unaligned_filter) == 0:
+                    continue
+                print(f'First toss: Omni {omni}, Effective {effective}, Unaligned {unaligned}')
+                for method in [None, 'u']:
+                    case_results = [x for x in unaligned_filter if x[IDX_METHOD] == method]
+                    if len(case_results) == 0:
+                        print(f'Method: {method}, Too rare')
+                        continue
+                    first_tune_sum = 0
+                    second_tune_sum = 0
+                    worse_count = 0
+                    for res in case_results:
+                        first_tune_sum += res[IDX_FIRST_TUNE]
+                        second_tune_sum += res[IDX_SECOND_TUNE]
+                        if res[IDX_FIRST_TUNE] < res[IDX_SECOND_TUNE]:
+                            worse_count += 1
+                    print(f'Method: {method}, First tune: {first_tune_sum / len(case_results)}, Second tune: {second_tune_sum / len(case_results)}, Worse: {worse_count / len(case_results)}')
+                print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+                
 
 if __name__ == '__main__':
     for need in [[3], [5]]:
@@ -52,7 +85,6 @@ if __name__ == '__main__':
             results = []
             for method in [None, 'u']:
                 test_unaligned_toss(need, unaligned_need, results, method)
-            for method in [None, 'u']:
-                analyze_unaligned_toss(results, method)
+            analyze_unaligned_toss(results)
             print('---------------------------------------------------------------------------------------------------')
             
