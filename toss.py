@@ -10,6 +10,9 @@ INIT_DICE_COUNT = 8
 TEST_COUNT = 100000
 DICE_COUNT_UPPER_BOUND = 16
 
+def avg(lst):
+    return sum(lst) / len(lst)
+
 def unaligned_range(needs):
     return range(len(needs), ELEM_OMNI)
 
@@ -33,6 +36,38 @@ def dice_effective_count(dices, num_elem):
         count += dices[i]
     count += dices[ELEM_OMNI]
     return count
+
+def dice_highest_unaligned(dices, needs):
+    highest_unaligned = 0
+    idx = 0
+    for i in unaligned_range(needs):
+        if dices[i] > highest_unaligned:
+            highest_unaligned = dices[i]
+            idx = i
+    assert dices[idx] == highest_unaligned or highest_unaligned == 0
+    return highest_unaligned, idx
+
+# Assume: single effective, single unaligned
+def dice_tune_check(dices, needs, unaligned_need):
+    assert len(needs) == 1
+    
+    omni_count = dices[ELEM_OMNI]
+    effective_count = dices[0]
+    unaligned_count, _ = dice_highest_unaligned(dices, needs)
+    
+    if unaligned_count >= unaligned_need:
+        tune_count = needs[0] - omni_count - effective_count
+        
+    elif unaligned_count + omni_count >= unaligned_need:
+        omni_count -= unaligned_need - unaligned_count
+        tune_count = needs[0] - omni_count - effective_count
+    else:
+        # We cannot utilize unaligned elem... worse case
+        tune_count = needs[0] + unaligned_need - omni_count - effective_count
+    
+    if tune_count < 0:
+        tune_count = 0
+    return tune_count
 
 def dice_analyze(dices, needs):
     lack = 0
@@ -70,6 +105,29 @@ def conditional_toss(dices, needs):
             dices[idx] = x
     
     # print(f'dices before retoss: {dices}, # of retoss: {retoss_count}')
+    toss(dices, retoss_count)
+
+# For Paimon, Weapon, Helm...
+def conditional_toss_keep_unaligned(dices, needs, unaligned_need):
+    retoss_count = 0
+    
+    # Retoss unaligned elems, except highest one
+    highest_unaligned, keep_unaligned_idx = dice_highest_unaligned(dices, needs)
+    for i in unaligned_range(needs):
+        if i == keep_unaligned_idx:
+            if highest_unaligned > unaligned_need:
+                retoss_count += dices[i] - unaligned_need
+                dices[i] = unaligned_need
+            continue
+        retoss_count += dices[i]
+        dices[i] = 0
+    # Retoss elems over needs
+    for idx, x in enumerate(needs):
+        if dices[idx] > x:
+            retoss_count += dices[idx] - x
+            dices[idx] = x
+            
+    # print(f'Before retoss {dices}, highest unaligned: {highest_unaligned}, idx: {keep_unaligned_idx}, retoss: {retoss_count}')
     toss(dices, retoss_count)
 
 # For tenshukaku, Priority: keep 5 types of elems, may retoss effective elems if types not enough

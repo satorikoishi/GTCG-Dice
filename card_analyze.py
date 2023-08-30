@@ -4,9 +4,6 @@ from toss import *
 
 valid_card = ['toss_up', 'tenshukaku', 'tsg']
 
-def avg(lst):
-    return sum(lst) / len(lst)
-
 def analyze_toss_up(dice_count, needs):
     test(needs, 0, dice_count)
 
@@ -33,6 +30,7 @@ def analyze_tenshukaku(num_tsg, num_elem, init_omni=0, method='a'):
         print(f'Aggresive: Tenshukaku {num_tsg}, Effective elem type {num_elem}, Init omni {init_omni}, Average total {avg(total_summary)}, Effective total {avg(effective_summary)}')
     else:
         print(f'Conservative: Tenshukaku {num_tsg}, Effective elem type {num_elem}, Init omni {init_omni}, Average total {avg(total_summary)}, Effective total {avg(effective_summary)}')
+    # TODO: check first toss omni count cases
     
 if __name__ == '__main__':
     card = sys.argv[1].lower()
